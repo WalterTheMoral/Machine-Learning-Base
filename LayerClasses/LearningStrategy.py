@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Tuple
+from Util import *
 
 class LearningStrategy:
     def __init__(self, learning_rate: float = 0.01):
@@ -61,4 +62,4 @@ class Adaptive(LearningStrategy):
             f"Adaptive Switch: {self.switch_value}"
         ]
 
-        return "\n".join(lines)
+        return "\n".join([lines[0]] + [indent_string(line) for line in lines[1:]])

@@ -34,7 +34,7 @@ class Random(Initialisation):
         lines = [super().__str__()]
 
         lines += [
-            f"Random Scale: {self.random_scale}"
+            f"\tRandom Scale: {self.random_scale}"
         ]
 
         return "\n".join(lines)
@@ -71,7 +71,7 @@ class File(Initialisation):
         lines = [super().__str__()]
 
         lines += [
-            f"Source File Name: {self.file_name}"
+            f"\tSource File Name: {self.file_name}"
         ]
 
         return "\n".join(lines)

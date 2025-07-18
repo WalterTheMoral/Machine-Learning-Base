@@ -3,10 +3,10 @@ from typing import Tuple
 import os
 
 from Util import *
-from Activation import *
-from Initialisation import *
-from LearningStrategy import *
-from Layer_Configuration import LayerConfiguration
+from LayerClasses.Activation import *
+from LayerClasses.Initialisation import *
+from LayerClasses.LearningStrategy import *
+from LayerClasses.Layer_Configuration import *
 
 class Layer:
     def __init__(self, configuration: LayerConfiguration):
@@ -74,7 +74,10 @@ class Layer:
             f"Shape of Input: {self.input_shape}",
             str(self.initialisation),
             str(self.activation),
-            str(self.learning_strategy)
+            str(self.learning_strategy),
+            f"Weights:",
+            f"\tb: {self.b.T}",
+            f"\tW Shape: {self.W.shape}"
         ]
 
         return "\n".join([lines[0]] + [indent_string(line) for line in lines[1:]])

@@ -21,7 +21,7 @@ class TrimActivation(Activation):
         lines = [super().__str__()]
 
         lines += [
-            f"Trim Value: {self.trim}"
+            f"\tTrim Value: {self.trim}"
         ]
 
         return "\n".join(lines)
@@ -47,7 +47,7 @@ class LeakyRelu(Activation):
         lines = [super().__str__()]
 
         lines += [
-            f"Leaky Reklu Gradient: {self.leaky_relu_d}"
+            f"\tLeaky Reklu Gradient: {self.leaky_relu_d}"
         ]
 
         return "\n".join(lines)
