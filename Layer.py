@@ -77,6 +77,4 @@ class Layer:
             str(self.learning_strategy)
         ]
 
-        formatted_lines = [lines[0]] + [indent_lines(lines[1:])]
-
-        return "\n".join(formatted_lines)
+        return "\n".join([lines[0]] + [indent_string(line) for line in lines[1:]])
