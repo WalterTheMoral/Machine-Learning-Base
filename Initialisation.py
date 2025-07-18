@@ -12,6 +12,13 @@ class Initialisation:
             -> Tuple[np.ndarray, np.ndarray]:
         return self._initialise_W(unit_count, input_shape), self._initialise_b(unit_count)
 
+    def __str__(self):
+        lines = [
+            f"Inititialisation Method: {self.__class__.__name__}"
+        ]
+        return "\n".join(lines)
+
+
 class Zero(Initialisation):
     def _initialise_W(self, unit_count: int, input_shape: Tuple[int,]) -> np.ndarray:
         return np.zeros( (unit_count, *input_shape) )
@@ -22,6 +29,15 @@ class Random(Initialisation):
 
     def _initialise_W(self, unit_count: int, input_shape: Tuple[int,]) -> np.ndarray:
         return np.random.randn(unit_count, *input_shape) * self.random_scale
+
+    def __str__(self):
+        lines = [super().__str__()]
+
+        lines += [
+            f"Random Scale: {self.random_scale}"
+        ]
+
+        return "\n".join(lines)
 
 class Xaviar(Initialisation):
     def _initialise_W(self, unit_count: int, input_shape: Tuple[int,]) -> np.ndarray:
@@ -51,9 +67,11 @@ class File(Initialisation):
 
         return W, b
 
+    def __str__(self):
+        lines = [super().__str__()]
 
-def initialise_adaptive(unit_count, input_shape, learning_rate=0.01) -> Tuple[np.ndarray, np.ndarray]:
-    adaptive_alpha_W = np.full((unit_count, *input_shape), learning_rate)
-    adaptive_alpha_b = np.full((unit_count, 1), learning_rate)
+        lines += [
+            f"Source File Name: {self.file_name}"
+        ]
 
-    return adaptive_alpha_W, adaptive_alpha_b
+        return "\n".join(lines)

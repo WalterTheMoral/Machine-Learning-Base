@@ -7,6 +7,25 @@ class Activation:
     def gradient(self, Z: np.ndarray) -> np.ndarray:
         raise NotImplementedError
 
+    def __str__(self):
+        lines = [
+            f"Activation Function: {self.__class__.__name__}"
+        ]
+        return "\n".join(lines)
+
+class TrimActivation(Activation):
+    def __init__(self, trim=1e-10):
+        self.trim = trim
+
+    def __str__(self):
+        lines = [super().__str__()]
+
+        lines += [
+            f"Trim Value: {self.trim}"
+        ]
+
+        return "\n".join(lines)
+
 class Relu(Activation):
     def calculate(self, Z: np.ndarray) -> np.ndarray:
         return np.maximum(0, Z)
@@ -15,7 +34,7 @@ class Relu(Activation):
         return np.where(Z < 0, 0, 1)
 
 class LeakyRelu(Activation):
-    def __init__(self, leaky_relu_d=0.001):
+    def __init__(self, leaky_relu_d=0.01):
         self.leaky_relu_d = leaky_relu_d
 
     def calculate(self, Z: np.ndarray) -> np.ndarray:
@@ -23,6 +42,15 @@ class LeakyRelu(Activation):
 
     def gradient(self, Z: np.ndarray) -> np.ndarray:
         return np.where(Z > 0, 1, self.leaky_relu_d)
+
+    def __str__(self):
+        lines = [super().__str__()]
+
+        lines += [
+            f"Leaky Reklu Gradient: {self.leaky_relu_d}"
+        ]
+
+        return "\n".join(lines)
 
 class Sigmoid(Activation):
     def calculate(self, Z: np.ndarray) -> np.ndarray:
@@ -46,10 +74,8 @@ class Softmax(Activation):
     def gradient(self, Z: np.ndarray) -> np.ndarray:
         return self.calculate(Z) * (1 - self.calculate(Z)) #TODO: Check Gradient
 
-class TrimSigmoid(Activation):
-    def __init__(self, trim=1e-10):
-        self.trim = trim
 
+class TrimSigmoid(TrimActivation):
     def calculate(self, Z: np.ndarray) -> np.ndarray:
         clipped = np.clip(Z, -100, 100)
         calculated = 1 / (1 + np.exp(-clipped))
@@ -59,10 +85,7 @@ class TrimSigmoid(Activation):
         calculated = self.calculate(Z)
         return calculated * (1 - calculated)
 
-class TrimTanH(Activation):
-    def __init__(self, trim=1e-10):
-        self.trim = trim
-
+class TrimTanH(TrimActivation):
     def calculate(self, Z: np.ndarray) -> np.ndarray:
         calculated = np.tanh(Z)
         return np.clip(calculated, -1 + self.trim, 1 - self.trim)

@@ -2,8 +2,10 @@ import numpy as np
 from typing import Tuple
 import os
 
+from Util import *
 from Activation import *
 from Initialisation import *
+from LearningStrategy import *
 from Layer_Configuration import LayerConfiguration
 
 class Layer:
@@ -12,23 +14,21 @@ class Layer:
         self.unit_count: int = configuration.unit_count
         self.input_shape: Tuple[int,] = configuration.input_shape
 
-        self.adaptive: bool = configuration.adaptive
+        self.learning_strategy: LearningStrategy = configuration.learning_strategy
+        self.activation = configuration.activation
+        self.initialisation = configuration.initialisation
 
-        self.learning_rate: float = configuration.learning_rate
-        self.random_scale: float = configuration.random_scale
-        self.leaky_relu_d: float = configuration.leaky_relu_d
-        self.adaptive_cont: float = configuration.adaptive_cont
-        self.adaptive_switch: float = configuration.adaptive_switch
-        self.activation_trim: float = configuration.activation_trim
+        self.m = np.sum(self.input_shape)
+        self.W, self.b = self.initialisation.initialise_weights(self.unit_count, self.input_shape)
+        self.learning_strategy.initialise_adaptive(self.unit_count, self.input_shape)
 
-        self.file_name: str = configuration.file_name
+    def save_weights(self, path: str, file_name: str) -> None:
+        """
+        Saves the weights W and b of current layer in a h5 file
+        :param path: Path of directory in which weights are saved
+        :param file_name: Name of file in which weights are saved
+        """
 
-        self.W, self.b = (
-            configuration.initialisation.initialise_weights(self.unit_count, self.input_shape))
-        self.adaptive_alpha_W, self.adaptive_alpha_b = (
-            initialise_adaptive(self.unit_count, self.input_shape, self.learning_rate))
-
-    def save_weights(self, path: str, file_name: str):
         if not os.path.exists(path):
             os.makedirs(path)
 
@@ -36,4 +36,47 @@ class Layer:
             hf.create_dataset("W", data=self.W)
             hf.create_dataset("b", data=self.b)
 
+    def feedforward(self, input_activation: np.ndarray) -> np.ndarray:
+        """
+        Propagates the layer forward, updating internal _previous_later and _Z variables
+        :param input_activation: Layer prior to current layer
+        :return: Vector of output of all perceptrons in layer
+        """
 
+        self._previous_layer = np.array(input_activation, copy=True)
+        self._Z = np.dot(self.W, input_activation) + self.b
+        return self.activation.calculate(self._Z)
+
+    def backward_propagation(self, dA) -> np.ndarray:
+        """
+        Propagates the layer backward, updating internal variables dW and db
+        :param dA: Derivative of the loss function with respect to the activation output of current layer
+        :return: Derivative of the loss function with respect to the activation output of previous layer
+        """
+
+        dZ = self.activation.gradient(self._Z) * dA
+        self.dW = (1.0 / self.m) * np.dot(dZ, self._previous_layer.T)
+        self.db = np.mean(dZ, axis=1, keepdims=True)
+
+        return np.dot(self.W.T, dZ)
+
+    def update_parameters(self) -> None:
+        """
+        Update W and b weights in accordance to learning strategy and calculated gradients
+        """
+
+        self.learning_strategy.update_parameters(self.W, self.b, self.dW, self.db)
+
+    def __str__(self):
+        lines = [
+            f"Name: {self.name}",
+            f"Number of Units: {self.unit_count}",
+            f"Shape of Input: {self.input_shape}",
+            str(self.initialisation),
+            str(self.activation),
+            str(self.learning_strategy)
+        ]
+
+        formatted_lines = [lines[0]] + [indent_lines(lines[1:])]
+
+        return "\n".join(formatted_lines)
