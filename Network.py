@@ -1,0 +1,58 @@
+import numpy as np
+from typing import List
+
+from NetworkClasses.Network_Configuration import *
+from Layer import Layer
+from Util import indent_string
+
+
+class Network:
+    def __init__(self, configuration: NetworkConfiguration):
+        self.name: str = configuration.name
+        self.cost: Cost = configuration.cost
+        self.threshold: float = configuration.threshold
+
+        self.layers: List[Layer] = []
+        self._is_compiled = False
+
+    def add(self, *layers: Layer):
+        for layer in layers: self.layers.append(layer)
+
+    def __add__(self, other: Layer):
+        self.layers.append(other)
+
+    def network_forward(self, inputs: np.ndarray) -> np.ndarray:
+        layer_output = inputs
+        for layer in self.layers:
+            layer_output = layer.feedforward(layer_output)
+
+        return layer_output
+
+    def network_backward(self, d_output: np.ndarray):
+        for layer in self.layers[::-1]:
+            d_output = layer.backward_propagation(d_output)
+            layer.update_parameters()
+
+    def train(self, inputs: np.ndarray, expected_output: np.ndarray, iterations: int) -> List[float]:
+        costs = []
+        for i in range(iterations):
+            network_output = self.network_forward(inputs)
+            self.network_backward( self.cost.gradient(network_output, expected_output) )
+
+            costs.append(self.cost.compute_cost(network_output, expected_output))
+
+        return costs
+
+    def predict(self, inputs: np.ndarray):
+        network_output = self.network_forward(inputs)
+        return network_output > self.threshold
+
+    def __str__(self):
+        layers = [
+            self.name,
+            str(self.cost),
+            f"Threshold: {self.threshold}",
+            *(indent_string(str(layer)) for layer in self.layers)
+        ]
+
+        return "\n".join(layers)

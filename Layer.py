@@ -56,7 +56,8 @@ class Layer:
 
         dZ = self.activation.gradient(self._Z) * dA
         self.dW = (1.0 / self.m) * np.dot(dZ, self._previous_layer.T)
-        self.db = np.mean(dZ, axis=1, keepdims=True)
+        # self.db = np.mean(dZ, axis=1, keepdims=True)
+        self.db = (1/self._previous_layer.shape[1]) * np.sum(dZ, axis=1, keepdims=True)
 
         return np.dot(self.W.T, dZ)
 
@@ -68,8 +69,10 @@ class Layer:
         self.learning_strategy.update_parameters(self.W, self.b, self.dW, self.db)
 
     def __str__(self):
+        import matplotlib.pyplot as plt
+
         lines = [
-            f"Name: {self.name}",
+            f"{self.name}",
             f"Number of Units: {self.unit_count}",
             f"Shape of Input: {self.input_shape}",
             str(self.initialisation),
@@ -79,5 +82,7 @@ class Layer:
             f"\tb: {self.b.T}",
             f"\tW Shape: {self.W.shape}"
         ]
+
+
 
         return "\n".join([lines[0]] + [indent_string(line) for line in lines[1:]])
