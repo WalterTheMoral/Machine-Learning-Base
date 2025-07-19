@@ -3,7 +3,7 @@ from typing import List
 
 from NetworkClasses.Network_Configuration import *
 from Layer import Layer
-from Util import indent_string
+from Util.Util import indent_string
 
 
 class Network:
@@ -48,11 +48,11 @@ class Network:
         return network_output > self.threshold
 
     def __str__(self):
-        layers = [
-            self.name,
+        lines = [
+            f"{self.name}:",
             str(self.cost),
             f"Threshold: {self.threshold}",
             *(indent_string(str(layer)) for layer in self.layers)
         ]
 
-        return "\n".join(layers)
+        return "\n".join([lines[0]] + [indent_string(line) for line in lines[1:]])

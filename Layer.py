@@ -2,7 +2,7 @@ import numpy as np
 from typing import Tuple
 import os
 
-from Util import *
+from Util.Util import *
 from LayerClasses.Activation import *
 from LayerClasses.Initialisation import *
 from LayerClasses.LearningStrategy import *
@@ -83,6 +83,8 @@ class Layer:
             f"\tW Shape: {self.W.shape}"
         ]
 
-
+        # plt.hist(self.W.reshape(-1))
+        # plt.title("W histogram")
+        # plt.show()
 
         return "\n".join([lines[0]] + [indent_string(line) for line in lines[1:]])

@@ -122,7 +122,7 @@ class ShallowNetwork2:
         model = Network( NetworkConfiguration("Model", CrossEntropy(), 0.7) )
         configurations = [
             LayerConfiguration("Perceptron 1", 10, (12288,), Relu(), Random()),
-            LayerConfiguration("Perceptron 1", 1, (10,), TrimSigmoid(), Random())
+            LayerConfiguration("Perceptron 2", 1, (10,), TrimSigmoid(), Random())
         ]
         model.add(*(Layer(config) for config in configurations))
 
@@ -131,6 +131,67 @@ class ShallowNetwork2:
 
         print(model)
 
+class ShallowNetwork3:
+    def test(self):
+        from Util.unit10.unit10 import c1w3_utils as u10
+
+        X, Y = u10.load_planar_dataset()
+        # plt.scatter(X[0, :], X[1, :], c=Y[0, :], s=40, cmap=plt.cm.Spectral)
+
+        shape_X = X.shape
+        shape_Y = Y.shape
+        m = shape_X[1]
+
+        # Train the logistic regression classifier
+        # clf = sklearn.linear_model.LogisticRegressionCV()
+        # clf.fit(X.T, Y[0, :])
+        # Plot the decision boundary for logistic regression
+        # u10.plot_decision_boundary(lambda x: clf.predict(x), X, Y)
+        # plt.title("Logistic Regression")
+        # plt.show()
+        # Print accuracy
+        # LR_predictions = clf.predict(X.T)
+        # print('Accuracy of logistic regression: %d ' % float(
+        #     (np.dot(Y, LR_predictions) + np.dot(1 - Y, 1 - LR_predictions)) / float(Y.size) * 100) +
+        #       '% ' + "(percentage of correctly labelled datapoints)")
+
+        model = Network(
+            NetworkConfiguration("Model", CrossEntropy(), 0.5)
+        )
+        configs = [
+            LayerConfiguration("Layer 1", 4, (2,), TanH(), Random(0.01), Standard(0.1)),
+            LayerConfiguration("Output Layer", 1, (4,), Sigmoid(), Random(0.01), Standard(0.1))
+        ]
+        model.add(*(Layer(config) for config in configs))
+
+        np.random.seed(1)
+        print(model)
+
+        costs = model.train(X, Y, 10000)
+        plt.plot(np.squeeze(costs))
+        plt.ylabel('cost')
+        plt.show()
+
+        u10.plot_decision_boundary(lambda x: model.predict(x.T), X, Y)
+        plt.title("Decision Boundary for hidden layer size " + str(4))
+        plt.show()
+        predictions = model.predict(X)
+        print('Accuracy: %d' % float(
+            (np.dot(Y, predictions.T) + np.dot(1 - Y, 1 - predictions.T)) / float(Y.size) * 100) + '%')
+
+class DeepNetwork1:
+    def test(self):
+        from Util.unit10.unit10 import c2w1_init_utils as u10
+
+        plt.rcParams['figure.figsize'] = (7.0, 4.0)
+        plt.rcParams['image.interpolation'] = 'nearest'
+        plt.rcParams['image.cmap'] = 'gray'
+
+        # load image dataset: blue/red dots in circles
+        train_X, train_Y, test_X, test_Y = u10.load_dataset()
+
+        
+
 
 if __name__ == "__main__":
-    ShallowNetwork1().test()
+    DeepNetwork1().test()

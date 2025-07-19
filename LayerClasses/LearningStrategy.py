@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Tuple
-from Util import *
+from Util.Util import *
 
 class LearningStrategy:
     def __init__(self, learning_rate: float = 0.01):
