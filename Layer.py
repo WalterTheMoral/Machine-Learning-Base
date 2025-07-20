@@ -35,6 +35,15 @@ class Layer:
             hf.create_dataset("W", data=self.W)
             hf.create_dataset("b", data=self.b)
 
+    def parameters_from_vector(self, vector: np.ndarray):
+        """
+        Updates the layer's parameters  from a flattened vector.
+
+        :param vector: A 1D array containing the concatenated weights and biases.
+        """
+        self.W = vector[0:self.W.size].reshape(self.W.shape)
+        self.b = vector[self.W.size:].reshape(self.b.shape)
+
     def feedforward(self, input_activation: np.ndarray) -> np.ndarray:
         """
         Propagates the layer forward, updating internal _previous_later and _Z variables

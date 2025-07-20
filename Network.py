@@ -5,7 +5,7 @@ import h5py
 
 from NetworkClasses.Network_Configuration import *
 from Layer import Layer
-from Util.Util import indent_string
+from Util.Util import *
 
 
 class Network:
@@ -35,7 +35,7 @@ class Network:
         return layer_output
 
     def network_backward(self, d_output: np.ndarray):        
-        for layer in self.layers[::-1]:
+        for layer in reversed(self.layers):
             d_output = layer.backward_propagation(d_output)
             layer.update_parameters()
 
@@ -48,7 +48,7 @@ class Network:
             network_output = self.network_forward(network_output)
             self.network_backward( self.cost.gradient(network_output, expected_output) )
 
-            if i % max(iterations // 100, 1) == 0:
+            if i % max(iterations // 100, 1) == 0: #TODO: Do correct logging
                 cost = self.cost.compute_cost(network_output, expected_output)
                 costs.append(cost)
                 print(f"Cost after {i // max(iterations // 100, 1)}%: {cost}")
@@ -58,6 +58,37 @@ class Network:
     def predict(self, inputs: np.ndarray):
         network_output = self.network_forward(inputs)
         return network_output > self.threshold
+
+    def verify_derivatives(self, inputs: np.ndarray, targets: np.ndarray, epsilon: float = 1e-7):
+        relative_difference = lambda approximations, derivatives: np.linalg.norm(derivatives - approximations) / ((np.linalg.norm(derivatives)) + np.linalg.norm(approximations))
+
+        output = self.network_forward(inputs)
+        self.network_backward(self.cost.gradient(output, targets))
+
+        for layer_number, layer in reversed(self.layers):
+            parameters = parameters_to_vector(layer.W, layer.b)
+            derivatives = derivatives_to_vector(layer.dW, layer.db)
+
+            approximations = np.zeros( derivatives.shape[0] )
+
+            for i in range( len(approximations) ):
+                addition_parameters = np.array(parameters, copy=True)
+                addition_parameters[i] += epsilon
+                layer.parameters_from_vector(addition_parameters)
+                addition_output = self.network_forward(inputs)
+                addition_cost = self.cost.compute_cost(addition_output, targets)
+
+                subtraction_parameters = np.array(parameters, copy=True)
+                subtraction_parameters[i] -= epsilon
+                layer.parameters_from_vector(subtraction_parameters)
+                subtraction_output = self.network_forward(inputs)
+                subtraction_cost = self.cost.compute_cost(subtraction_output, targets)
+
+                approximations[i] = abs(addition_cost - subtraction_cost) / (2 * epsilon)
+
+            layer.parameters_from_vector(parameters)
+
+
 
     def __str__(self):
         lines = [
