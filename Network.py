@@ -1,5 +1,7 @@
 import numpy as np
 from typing import List
+import os
+import h5py
 
 from NetworkClasses.Network_Configuration import *
 from Layer import Layer
@@ -21,6 +23,10 @@ class Network:
     def __add__(self, other: Layer):
         self.layers.append(other)
 
+    def save_weights(self, path):
+        for i, layer in enumerate(self.layers):
+            layer.save_weights(path, f"Layer{i}")
+
     def network_forward(self, inputs: np.ndarray) -> np.ndarray:
         layer_output = inputs
         for layer in self.layers:
@@ -28,18 +34,24 @@ class Network:
 
         return layer_output
 
-    def network_backward(self, d_output: np.ndarray):
+    def network_backward(self, d_output: np.ndarray):        
         for layer in self.layers[::-1]:
             d_output = layer.backward_propagation(d_output)
             layer.update_parameters()
 
-    def train(self, inputs: np.ndarray, expected_output: np.ndarray, iterations: int) -> List[float]:
+    def train(self, inputs: np.ndarray, expected_output: np.ndarray, iterations: int = 10000) -> List[float]:
         costs = []
+
         for i in range(iterations):
-            network_output = self.network_forward(inputs)
+            network_output = inputs
+
+            network_output = self.network_forward(network_output)
             self.network_backward( self.cost.gradient(network_output, expected_output) )
 
-            costs.append(self.cost.compute_cost(network_output, expected_output))
+            if i % max(iterations // 100, 1) == 0:
+                cost = self.cost.compute_cost(network_output, expected_output)
+                costs.append(cost)
+                print(f"Cost after {i // max(iterations // 100, 1)}%: {cost}")
 
         return costs
 

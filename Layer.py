@@ -18,7 +18,6 @@ class Layer:
         self.activation = configuration.activation
         self.initialisation = configuration.initialisation
 
-        self.m = np.sum(self.input_shape)
         self.W, self.b = self.initialisation.initialise_weights(self.unit_count, self.input_shape)
         self.learning_strategy.initialise_adaptive(self.unit_count, self.input_shape)
 
@@ -54,10 +53,10 @@ class Layer:
         :return: Derivative of the loss function with respect to the activation output of previous layer
         """
 
+        m = self._previous_layer.shape[1] 
         dZ = self.activation.gradient(self._Z) * dA
-        self.dW = (1.0 / self.m) * np.dot(dZ, self._previous_layer.T)
-        # self.db = np.mean(dZ, axis=1, keepdims=True)
-        self.db = (1/self._previous_layer.shape[1]) * np.sum(dZ, axis=1, keepdims=True)
+        self.dW = (1.0 / m) * np.dot(dZ, self._previous_layer.T)
+        self.db = (1.0 / m) * np.sum(dZ, axis=1, keepdims=True)
 
         return np.dot(self.W.T, dZ)
 
@@ -66,7 +65,7 @@ class Layer:
         Update W and b weights in accordance to learning strategy and calculated gradients
         """
 
-        self.learning_strategy.update_parameters(self.W, self.b, self.dW, self.db)
+        self.W, self.b = self.learning_strategy.update_parameters(self.W, self.b, self.dW, self.db)
 
     def __str__(self):
         import matplotlib.pyplot as plt
@@ -83,8 +82,8 @@ class Layer:
             f"\tW Shape: {self.W.shape}"
         ]
 
-        # plt.hist(self.W.reshape(-1))
-        # plt.title("W histogram")
-        # plt.show()
+        plt.hist(self.W.reshape(-1))
+        plt.title("W histogram")
+        plt.show()
 
         return "\n".join([lines[0]] + [indent_string(line) for line in lines[1:]])

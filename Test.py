@@ -1,7 +1,7 @@
 import random
 import matplotlib.pyplot as plt
+from PIL import Image
 
-from Layer import *
 from LayerClasses.Layer_Configuration import *
 
 from LayerClasses.LearningStrategy import *
@@ -133,7 +133,7 @@ class ShallowNetwork2:
 
 class ShallowNetwork3:
     def test(self):
-        from Util.unit10.unit10 import c1w3_utils as u10
+        from unit10 import c1w3_utils as u10
 
         X, Y = u10.load_planar_dataset()
         # plt.scatter(X[0, :], X[1, :], c=Y[0, :], s=40, cmap=plt.cm.Spectral)
@@ -181,7 +181,7 @@ class ShallowNetwork3:
 
 class DeepNetwork1:
     def test(self):
-        from Util.unit10.unit10 import c2w1_init_utils as u10
+        from unit10 import c2w1_init_utils as u10
 
         plt.rcParams['figure.figsize'] = (7.0, 4.0)
         plt.rcParams['image.interpolation'] = 'nearest'
@@ -189,9 +189,147 @@ class DeepNetwork1:
 
         # load image dataset: blue/red dots in circles
         train_X, train_Y, test_X, test_Y = u10.load_dataset()
+        plt.close()
 
-        
+        np.random.seed(1)
+        # configs = [
+        #     LayerConfiguration("Perceptron 1", 30, (12288,), Relu(), Xaviar(), Standard(0.0075)),
+        #     LayerConfiguration("Perceptron 2", 15, (30,), TrimSigmoid(), He(), Standard(0.1))
+        # ]
+        # hidden1, hidden2 = (Layer(config) for config in configs)
+        # print(hidden1)
+        # print(hidden2)
+        #
+        #
+        # hidden1 = Layer(LayerConfiguration("Perceptron 1", 10, (10,), Relu(), Xaviar(), Standard(0.0075)))
+        # hidden1.b = np.random.rand(hidden1.b.shape[0], hidden1.b.shape[1])
+        # hidden1.save_weights("SaveDir", "Hidden1")
+        # hidden2 = Layer(LayerConfiguration("Perceptron 2", 10, (10,), TrimSigmoid(), File("SaveDir/Hidden1.h5"), Standard(0.1)))
+        # print(hidden1)
+        # print(hidden2)
+        # m1 = Network(NetworkConfiguration("Model", SquaredMean(), 0.5))
+        # m1.add(hidden1, hidden2)
+        # dir = "m1"
+        # m1.save_weights(dir)
+        # print(os.listdir(dir))
+
+        np.random.seed(2)
+        configs = [
+            LayerConfiguration("Layer 1", 10, (2,), Relu(), He(), Standard(0.01)),
+            LayerConfiguration("Layer 2", 5, (10,), Relu(), He(), Standard(0.01)),
+            LayerConfiguration("Output", 1, (5,), TrimSigmoid(), He(), Standard(0.1))
+        ]
+        model = Network(NetworkConfiguration("Model", CrossEntropy(), 0.5))
+        model.add(*(Layer(config) for config in configs))
+
+        init = "large random"
+        costs = model.train(train_X, train_Y, 15000)
+        plt.plot(costs)
+        plt.ylabel('cost')
+        plt.xlabel('iterations (per 150s)')
+        plt.title(init + " initialization")
+        plt.show()
+
+        plt.title("Model with " + init + " initialization")
+        axes = plt.gca()
+        axes.set_xlim([-1.5, 1.5])
+        axes.set_ylim([-1.5, 1.5])
+        u10.plot_decision_boundary(lambda x: model.predict(x.T), test_X, test_Y)
+
+        predictions = model.predict(train_X)
+        print('Train accuracy: %d' % float(
+            (np.dot(train_Y, predictions.T) + np.dot(1 - train_Y, 1 - predictions.T)) / float(
+                train_Y.size) * 100) + '%')
+        predictions = model.predict(test_X)
+        print('Test accuracy: %d' % float(
+            (np.dot(test_Y, predictions.T) + np.dot(1 - test_Y, 1 - predictions.T)) / float(test_Y.size) * 100) + '%')
+
+class DeepNetwork2:
+    def test(self):
+        from unit10 import c1w4_utils as u10
+
+        train_x_orig, train_y, test_x_orig, test_y, classes = u10.load_datasetC1W4()
+        # Example of a picture
+        index = 87
+        # plt.imshow(train_x_orig[index])
+        # plt.show()
+        print("y = " + str(train_y[0, index]) + ". It's a " + classes[train_y[0, index]].decode("utf-8") + " picture.")
+
+        m_train = train_x_orig.shape[0]
+        num_px = train_x_orig[0].shape[0]
+        m_test = test_x_orig.shape[0]
+
+        print("Number of training examples: " + str(m_train))
+        print("Number of testing examples: " + str(m_test))
+        print("Each image is of size: (" + str(num_px) + ", " + str(num_px) + ", 3)")
+        print("train_x_orig shape: " + str(train_x_orig.shape))
+        print("train_y shape: " + str(train_y.shape))
+        print("test_x_orig shape: " + str(test_x_orig.shape))
+        print("test_y shape: " + str(test_y.shape))
+
+        # Reshape the training and test examples
+        train_x_flatten = train_x_orig.reshape(train_x_orig.shape[0], -1).T
+        test_x_flatten = test_x_orig.reshape(test_x_orig.shape[0], -1).T
+        # Standardize data to have feature values between -0.5 and 0.5.
+        train_x = train_x_flatten / 255 - 0.5
+        test_x = test_x_flatten / 255 - 0.5
+
+        print("train_x's shape: " + str(train_x.shape))
+        print("test_x's shape: " + str(test_x.shape))
+        print("normelized train color: ", str(train_x[10][10]))
+        print("normelized test color: ", str(test_x[10][10]))
+
+
+        model = Network(NetworkConfiguration("Model", CrossEntropy(), 0.5))
+        configs = [
+            LayerConfiguration("Layer 1", 7, (12288,), Relu(), Xaviar(), Standard(0.007)),
+            LayerConfiguration("Layer 2", 1, (7,), Sigmoid(), Xaviar(), Standard(0.007))
+        ]
+        model.add(*(Layer(config) for config in configs))
+
+        # costs = model.train(train_x, train_y, 2500)
+        # plt.plot(np.squeeze(costs))
+        # plt.ylabel('cost')
+        # plt.xlabel('iterations (per 25s)')
+        # plt.title("Learning rate =" + str(0.007))
+        # plt.show()
+        # print("train accuracy:", np.mean(model.predict(train_x) == train_y))
+        # print("test accuracy:", np.mean(model.predict(test_x) == test_y))
+
+        model = Network(NetworkConfiguration("Model", CrossEntropy(), 0.5))
+        configs = [
+            LayerConfiguration("Layer 1", 30, (train_x.shape[0],), Relu(), Xaviar(), Standard(0.0075)),
+            LayerConfiguration("Layer 2", 15, (30,), Relu(), Xaviar(), Standard(0.0075)),
+            LayerConfiguration("Layer 3", 10, (15,), Relu(), Xaviar(), Standard(0.0075)),
+            LayerConfiguration("Layer 4", 10, (10,), Relu(), Xaviar(), Standard(0.0075)),
+            LayerConfiguration("Layer 5", 5, (10,), Relu(), Xaviar(), Standard(0.0075)),
+            LayerConfiguration("Layer 6", 1, (5,), TrimSigmoid(), Xaviar(), Standard(0.0075))
+        ]
+        model.add(*(Layer(config) for config in configs))
+
+        costs = model.train(train_x, train_y, 2500)
+        plt.plot(np.squeeze(costs))
+        plt.ylabel('cost')
+        plt.xlabel('iterations (per 25s)')
+        plt.title("Learning rate =" + str(0.007))
+        plt.show()
+        print("train accuracy:", np.mean(model.predict(train_x) == train_y))
+        print("test accuracy:", np.mean(model.predict(test_x) == test_y))
+
+        # Test your image
+        img_path = r'C:\Users\smash\Documents\PycharmProjects\Machine Learning Base\Util\cat.jpeg'  # full path of the image
+        my_label_y = [0]  # the true class of your image (1 -> cat, 0 -> non-cat)
+        img = Image.open(img_path)
+        image64 = img.resize((num_px, num_px), Image.Resampling.LANCZOS)
+        plt.imshow(img)
+        plt.show()
+        plt.imshow(image64)
+        plt.show()
+        my_image = np.reshape(image64, (num_px * num_px * 3, 1))
+        my_image = my_image / 255. - 0.5
+        p = model.predict(my_image)
+        print("L-layer model predicts a \"" + classes[int(p),].decode("utf-8") + "\" picture.")
 
 
 if __name__ == "__main__":
-    DeepNetwork1().test()
+    DeepNetwork2().test()
