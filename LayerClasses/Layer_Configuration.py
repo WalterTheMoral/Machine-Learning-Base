@@ -13,6 +13,6 @@ class LayerConfiguration:
     initialisation: Initialisation
     learning_strategy: LearningStrategy = Standard(0.01)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         pass
         #TODO: Do checks on values

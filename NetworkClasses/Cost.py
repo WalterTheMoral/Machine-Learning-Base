@@ -6,8 +6,10 @@ class Cost:
     def calculate(self, predictions: np.ndarray, targets: np.ndarray) -> np.ndarray:
         """
         Calculate loss of neural network using chosen method
+
         :param predictions: Output of neural network
         :param targets: Expected output of neural network
+
         :return: Loss of neural network
         """
         raise NotImplementedError
@@ -31,7 +33,7 @@ class Cost:
         error = self.calculate(predictions, targets)
         return (1 / predictions.shape[1]) * np.sum(error)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Cost Function: {self.__class__.__name__}"
 
 class SquaredMean(Cost):

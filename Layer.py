@@ -9,7 +9,7 @@ from LayerClasses.LearningStrategy import *
 from LayerClasses.Layer_Configuration import *
 
 class Layer:
-    def __init__(self, configuration: LayerConfiguration):
+    def __init__(self, configuration: LayerConfiguration) -> None:
         self.name: str = configuration.name
         self.unit_count: int = configuration.unit_count
         self.input_shape: Tuple[int,] = configuration.input_shape
@@ -24,6 +24,7 @@ class Layer:
     def save_weights(self, path: str, file_name: str) -> None:
         """
         Saves the weights W and b of current layer in a h5 file
+
         :param path: Path of directory in which weights are saved
         :param file_name: Name of file in which weights are saved
         """
@@ -37,8 +38,10 @@ class Layer:
 
     def feedforward(self, input_activation: np.ndarray) -> np.ndarray:
         """
-        Propagates the layer forward, updating internal _previous_later and _Z variables
+        Propagates the layer forward, updating internal _previous_layer and _Z variables
+
         :param input_activation: Layer prior to current layer
+
         :return: Vector of output of all perceptrons in layer
         """
 
@@ -46,10 +49,12 @@ class Layer:
         self._Z = np.dot(self.W, input_activation) + self.b
         return self.activation.calculate(self._Z)
 
-    def backward_propagation(self, dA) -> np.ndarray:
+    def backward_propagation(self, dA: np.ndarray) -> np.ndarray:
         """
         Propagates the layer backward, updating internal variables dW and db
+
         :param dA: Derivative of the loss function with respect to the activation output of current layer
+
         :return: Derivative of the loss function with respect to the activation output of previous layer
         """
 
@@ -67,7 +72,7 @@ class Layer:
 
         self.W, self.b = self.learning_strategy.update_parameters(self.W, self.b, self.dW, self.db)
 
-    def __str__(self):
+    def __str__(self) -> str:
         import matplotlib.pyplot as plt
 
         lines = [

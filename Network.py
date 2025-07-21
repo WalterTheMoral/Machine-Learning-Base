@@ -9,7 +9,7 @@ from Util.Util import indent_string
 
 
 class Network:
-    def __init__(self, configuration: NetworkConfiguration):
+    def __init__(self, configuration: NetworkConfiguration) -> None:
         self.name: str = configuration.name
         self.cost: Cost = configuration.cost
         self.threshold: float = configuration.threshold
@@ -25,10 +25,10 @@ class Network:
         """
         for layer in layers: self.layers.append(layer)
 
-    def __add__(self, other: Layer):
+    def __add__(self, other: Layer) -> None:
         self.layers.append(other)
 
-    def save_weights(self, path) -> None:
+    def save_weights(self, path: str) -> None:
         """
         Saves the weights of all layers in the network to different files in the specified path.
 
@@ -40,7 +40,9 @@ class Network:
     def network_forward(self, inputs: np.ndarray) -> np.ndarray:
         """
         Performs a forward pass through the neural network.
+
         :param inputs: Input data to be passed through the network.
+
         :return: The output of the network after processing the input through all layers.
         """
         layer_output = inputs
@@ -84,7 +86,7 @@ class Network:
 
         return costs
 
-    def predict(self, inputs: np.ndarray):
+    def predict(self, inputs: np.ndarray) -> np.ndarray:
         """
         Predicts the output class for the given input data using the trained network.
 
@@ -96,7 +98,7 @@ class Network:
         network_output = self.network_forward(inputs)
         return network_output > self.threshold
 
-    def __str__(self):
+    def __str__(self) -> str:
         lines = [
             f"{self.name}:",
             str(self.cost),

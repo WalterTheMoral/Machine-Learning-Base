@@ -4,7 +4,9 @@ class Activation:
     def calculate(self, Z: np.ndarray) -> np.ndarray:
         """
         Calculates activation function of parameter Z
+
         :param Z: Input to activation function
+
         :return: Output of activation function with input Z
         """
         raise NotImplementedError
@@ -12,22 +14,24 @@ class Activation:
     def gradient(self, Z: np.ndarray) -> np.ndarray:
         """
         Calculates gradient of activation function at input Z
+
         :param Z: Input at which to calculate gradient.
+
         :return: Gradient of activation function at input Z
         """
         raise NotImplementedError
 
-    def __str__(self):
+    def __str__(self) -> str:
         lines = [
             f"Activation Function: {self.__class__.__name__}"
         ]
         return "\n".join(lines)
 
 class TrimActivation(Activation):
-    def __init__(self, trim=1e-10):
+    def __init__(self, trim=1e-10) -> None:
         self.trim = trim
 
-    def __str__(self):
+    def __str__(self) -> str:
         lines = [super().__str__()]
 
         lines += [
@@ -44,7 +48,7 @@ class Relu(Activation):
         return np.where(Z < 0, 0, 1)
 
 class LeakyRelu(Activation):
-    def __init__(self, leaky_relu_d=0.01):
+    def __init__(self, leaky_relu_d=0.01) -> None:
         self.leaky_relu_d = leaky_relu_d
 
     def calculate(self, Z: np.ndarray) -> np.ndarray:
@@ -53,7 +57,7 @@ class LeakyRelu(Activation):
     def gradient(self, Z: np.ndarray) -> np.ndarray:
         return np.where(Z > 0, 1, self.leaky_relu_d)
 
-    def __str__(self):
+    def __str__(self) -> str:
         lines = [super().__str__()]
 
         lines += [

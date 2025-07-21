@@ -3,15 +3,15 @@ from typing import Tuple
 from Util.Util import *
 
 class LearningStrategy:
-    def __init__(self, learning_rate: float = 0.01):
+    def __init__(self, learning_rate: float = 0.01) -> None:
         self.learning_rate = learning_rate
 
     def initialise_adaptive(self, unit_count: int, input_shape: Tuple[int,]) -> None:
         """
         Initialise adaptive learning rates for layer. Does nothing if LearningStrategy is Standard
-        :param unit_count:
-        :param input_shape:
-        :return:
+
+        :param unit_count: Number of neurons in layer
+        :param input_shape: Number of neurons in previous layer
         """
         raise NotImplementedError
 
@@ -19,15 +19,17 @@ class LearningStrategy:
             -> Tuple[np.ndarray, np.ndarray]:
         """
         Update layer parameters in accordance with gradients and LearningStrategy
+
         :param W: Current weights of layer
         :param b: Current biases of layer
         :param dW: Current gradient of layer's weights
         :param db: Current gradient of layer's biases
+
         :return: Updated weights and biases
         """
         raise NotImplementedError
 
-    def __str__(self):
+    def __str__(self) -> str:
         lines = [
             f"Learning Rate: {self.learning_rate}"
         ]
@@ -45,7 +47,7 @@ class Standard(LearningStrategy):
         return W, b
 
 class Adaptive(LearningStrategy):
-    def __init__(self, learning_rate: float = 0.01, scale: float = 1.1, switch_value: float = 0.5):
+    def __init__(self, learning_rate: float = 0.01, scale: float = 1.1, switch_value: float = 0.5) -> None:
         super().__init__(learning_rate)
         self.scale: float = scale
         self.switch_value: float = switch_value
@@ -74,7 +76,7 @@ class Adaptive(LearningStrategy):
 
         return W, b
 
-    def __str__(self):
+    def __str__(self) -> str:
         lines = [f"Adaptive Strategy"]
         lines += [super().__str__()]
         lines += [
