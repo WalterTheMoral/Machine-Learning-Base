@@ -7,10 +7,24 @@ class LearningStrategy:
         self.learning_rate = learning_rate
 
     def initialise_adaptive(self, unit_count: int, input_shape: Tuple[int,]) -> None:
+        """
+        Initialise adaptive learning rates for layer. Does nothing if LearningStrategy is Standard
+        :param unit_count:
+        :param input_shape:
+        :return:
+        """
         raise NotImplementedError
 
     def update_parameters(self, W: np.ndarray, b: np.ndarray, dW: np.ndarray, db: np.ndarray) \
             -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Update layer parameters in accordance with gradients and LearningStrategy
+        :param W: Current weights of layer
+        :param b: Current biases of layer
+        :param dW: Current gradient of layer's weights
+        :param db: Current gradient of layer's biases
+        :return: Updated weights and biases
+        """
         raise NotImplementedError
 
     def __str__(self):
@@ -33,15 +47,21 @@ class Standard(LearningStrategy):
 class Adaptive(LearningStrategy):
     def __init__(self, learning_rate: float = 0.01, scale: float = 1.1, switch_value: float = 0.5):
         super().__init__(learning_rate)
-        self.scale = scale
-        self.switch_value = switch_value
+        self.scale: float = scale
+        self.switch_value: float = switch_value
+
+        self._initialised: bool = False
 
     def initialise_adaptive(self, unit_count: int, input_shape: Tuple[int,]) -> None:
         self.adaptive_alpha_W = np.full((unit_count, *input_shape), self.learning_rate)
         self.adaptive_alpha_b = np.full((unit_count, 1), self.learning_rate)
 
+        self._initialised = True
+
     def update_parameters(self, W: np.ndarray, b: np.ndarray, dW: np.ndarray, db: np.ndarray) \
             -> Tuple[np.ndarray, np.ndarray]:
+        if not self._initialised: raise AttributeError("Adaptive learning rates have not been initialised")
+
         self.adaptive_alpha_W *= np.where(self.adaptive_alpha_W * dW > 0,
                                           self.scale,
                                           -self.switch_value)

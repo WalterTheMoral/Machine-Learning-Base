@@ -4,12 +4,29 @@ import h5py
 
 class Initialisation:
     def _initialise_W(self, unit_count: int, input_shape: Tuple[int,]) -> np.ndarray:
+        """
+        Initialises layer weights using chosen initialised method
+        :param unit_count: Number of neurons in layer
+        :param input_shape: Number of neurons in previous layer
+        :return: Initialised weights of layer
+        """
         raise NotImplementedError
     def _initialise_b(self, unit_count: int) -> np.ndarray:
+        """
+        Initialises layer biases using chosen initialised method
+        :param unit_count: Number of neurons in layer
+        :return: Initialised biases of layer
+        """
         return np.zeros((unit_count, 1), dtype=float)
 
     def initialise_weights(self, unit_count: int, input_shape: Tuple[int,]) \
             -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Initialises layer weights and biases using chosen initialised method
+        :param unit_count: Number of neurons in layer
+        :param input_shape: Number of neurons in previous layer
+        :return: Initialised weights and biases of layer
+        """
         return self._initialise_W(unit_count, input_shape), self._initialise_b(unit_count)
 
     def __str__(self):

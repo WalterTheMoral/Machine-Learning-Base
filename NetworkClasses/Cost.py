@@ -4,12 +4,30 @@ from numpy import floating
 
 class Cost:
     def calculate(self, predictions: np.ndarray, targets: np.ndarray) -> np.ndarray:
+        """
+        Calculate loss of neural network using chosen method
+        :param predictions: Output of neural network
+        :param targets: Expected output of neural network
+        :return: Loss of neural network
+        """
         raise NotImplementedError
 
     def gradient(self, predictions: np.ndarray, targets: np.ndarray) -> np.ndarray:
+        """
+        Gradient of loss function with respect to output of network
+        :param predictions: Output of network
+        :param targets: Expected output of neural network
+        :return: Gradient of loss function with respect to output of network
+        """
         raise NotImplementedError
 
     def compute_cost(self, predictions: np.ndarray, targets: np.ndarray) -> float:
+        """
+        Computes cost (average value of loss) of neural network
+        :param predictions: Output of network
+        :param targets: Expected output of neural network
+        :return: Cost (average value of loss) of neural network
+        """
         error = self.calculate(predictions, targets)
         return (1 / predictions.shape[1]) * np.sum(error)
 

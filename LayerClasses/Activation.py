@@ -2,9 +2,19 @@ import numpy as np
 
 class Activation:
     def calculate(self, Z: np.ndarray) -> np.ndarray:
+        """
+        Calculates activation function of parameter Z
+        :param Z: Input to activation function
+        :return: Output of activation function with input Z
+        """
         raise NotImplementedError
 
     def gradient(self, Z: np.ndarray) -> np.ndarray:
+        """
+        Calculates gradient of activation function at input Z
+        :param Z: Input at which to calculate gradient.
+        :return: Gradient of activation function at input Z
+        """
         raise NotImplementedError
 
     def __str__(self):
