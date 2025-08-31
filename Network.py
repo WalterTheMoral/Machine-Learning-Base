@@ -57,7 +57,7 @@ class Network:
 
         :param d_output: The gradient of the loss with respect to the network's output.
         """
-        for layer in self.layers[::-1]:
+        for layer in reversed(self.layers):
             d_output = layer.backward_propagation(d_output)
             layer.update_parameters()
 
@@ -77,6 +77,9 @@ class Network:
             network_output = inputs
 
             network_output = self.network_forward(network_output)
+            print(network_output)
+            print(f"W: {self.layers[0].W}")
+            print(f"b: {self.layers[0].b}")
             self.network_backward( self.cost.gradient(network_output, expected_output) )
 
             if i % max(iterations // 100, 1) == 0:
@@ -96,7 +99,13 @@ class Network:
         """
 
         network_output = self.network_forward(inputs)
-        return network_output > self.threshold
+        # return network_output > self.threshold
+
+        if network_output.shape[0] > 1: # softmax
+            predictions = np.where(network_output==network_output.max(axis=0), 1, 0)
+            return predictions
+        else:
+            return network_output > self.threshold
 
     def __str__(self) -> str:
         lines = [

@@ -45,7 +45,7 @@ class Layer:
         :return: Vector of output of all perceptrons in layer
         """
 
-        self._previous_layer = np.array(input_activation, copy=True)
+        self._previous_layer = np.copy(input_activation)
         self._Z = np.dot(self.W, input_activation) + self.b
         return self.activation.calculate(self._Z)
 

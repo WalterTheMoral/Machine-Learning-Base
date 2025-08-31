@@ -83,10 +83,11 @@ class TanH(Activation):
 
 class Softmax(Activation):
     def calculate(self, Z: np.ndarray) -> np.ndarray:
-        return np.exp(Z) / np.max(np.exp(Z), axis=0)
+        return np.exp(Z) / np.sum(np.exp(Z), axis=0)
 
     def gradient(self, Z: np.ndarray) -> np.ndarray:
-        return self.calculate(Z) * (1 - self.calculate(Z)) #TODO: Check Gradient
+        # return self.calculate(Z) * (1 - self.calculate(Z)) #TODO: Check Gradient
+        return 1
 
 
 class TrimSigmoid(TrimActivation):
