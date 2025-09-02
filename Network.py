@@ -77,9 +77,6 @@ class Network:
             network_output = inputs
 
             network_output = self.network_forward(network_output)
-            print(network_output)
-            print(f"W: {self.layers[0].W}")
-            print(f"b: {self.layers[0].b}")
             self.network_backward( self.cost.gradient(network_output, expected_output) )
 
             if i % max(iterations // 100, 1) == 0:

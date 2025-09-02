@@ -11,8 +11,6 @@ from Network import *
 from NetworkClasses.Network_Configuration import *
 from NetworkClasses.Cost import *
 
-import torch
-
 class ShallowNetwork1:
     def test(self):
         np.random.seed(1)
@@ -374,7 +372,7 @@ class Softmax1:
         print("\n" + "*"*80 + "\n")
 
         np.random.seed(3)
-        softmax_layer = Layer(LayerConfiguration("Layer1", 3, (4,), Softmax(), Random()))
+        softmax_layer = Layer(LayerConfiguration("Layer1", 3, (4,), Softmax(), Random(), Standard(1.2)))
         model = Network(NetworkConfiguration("Model", CategoricalCrossEntropy()))
         model.add(softmax_layer)
         X = np.random.randn(4, 50000) * 10
@@ -387,17 +385,12 @@ class Softmax1:
                 Y[2][i] = 1
             else:
                 Y[1][i] = 1
-        costs = model.train(X, Y, 2)
+        costs = model.train(X, Y, 1000)
         plt.plot(costs)
         plt.show()
         predictions = model.predict(X)
         print("right", np.sum(Y.argmax(axis=0) == predictions.argmax(axis=0)))
         print("wrong", np.sum(Y.argmax(axis=0) != predictions.argmax(axis=0)))
-
-class PyTorch:
-    def test(self):
-        torch.
-
 
 
 if __name__ == "__main__":
