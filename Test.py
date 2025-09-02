@@ -1,15 +1,18 @@
 import random
+import matplotlib
 import matplotlib.pyplot as plt
-from PIL import Image
+from PIL import Image, ImageOps
+import numpy as np
+from sklearn.datasets import fetch_openml
 
-from LayerClasses.Layer_Configuration import *
-
+from LayerClasses.Layer_Configuration import LayerConfiguration
 from LayerClasses.LearningStrategy import *
 from LayerClasses.Initialisation import *
 from LayerClasses.Activation import *
 from Network import *
 from NetworkClasses.Network_Configuration import *
 from NetworkClasses.Cost import *
+from Util.Util import *
 
 class ShallowNetwork1:
     def test(self):
@@ -392,6 +395,53 @@ class Softmax1:
         print("right", np.sum(Y.argmax(axis=0) == predictions.argmax(axis=0)))
         print("wrong", np.sum(Y.argmax(axis=0) != predictions.argmax(axis=0)))
 
+class Softmax2:
+    def test(self):
+        mnist = fetch_openml('mnist_784')
+        X, Y = mnist["data"], mnist["target"]
+
+        X = (X / 255 - 0.5).to_numpy()
+        Y = Y.to_numpy()
+
+        i = 12
+        # plt.imshow(X[i:i + 1].reshape(28, 28), cmap=matplotlib.cm.binary)
+        # plt.axis("off")
+        # plt.show()
+        print("Label is: '" + Y[i] + "'")
+
+        print(int(Y[i]))
+        Y_new = num_to_one_hot(10, Y)
+        print("New label is:", Y_new[:, i])
+
+        m = 60000
+        m_test = X.shape[0] - m
+        X_train, X_test = X[:m].T, X[m:].T
+        Y_train, Y_test = Y_new[:, :m], Y_new[:, m:]
+        np.random.seed(111)
+        shuffle_index = np.random.permutation(m)
+        X_train, Y_train = X_train[:, shuffle_index], Y_train[:, shuffle_index]
+        i = 12
+        plt.imshow(X_train[:, i].reshape(28, 28), cmap=matplotlib.cm.binary)
+        plt.axis("off")
+        plt.show()
+        print(Y_train[:, i])
+
+        configs = (
+            LayerConfiguration("Layer 1", 64, (28 * 28,), Sigmoid(), Xaviar(), Adaptive(0.1)),
+            LayerConfiguration("Output", 10, (64,), Softmax(), Xaviar(), Adaptive(0.1))
+        )
+        model = Network(NetworkConfiguration("Model", CategoricalCrossEntropy()))
+        model.add(*(Layer(config) for config in configs))
+
+        np.random.seed(1)
+        costs = model.train(X_train, Y_train, 200)
+        plt.plot(np.squeeze(costs))
+        plt.ylabel('cost')
+        plt.xlabel('iterations')
+        plt.title("Learning rate =" + str(0.1))
+        plt.show()
+        model.save_weights("digits")
+
 
 if __name__ == "__main__":
-    Softmax1().test()
+    Softmax2().test()
