@@ -22,7 +22,7 @@ class Initialisation:
 
         :return: Initialised biases of layer
         """
-        return np.zeros((unit_count, 1), dtype=float)
+        return np.zeros((unit_count,1), dtype=float)
 
     def initialise_weights(self, unit_count: int, input_shape: Tuple[int,]) \
             -> Tuple[np.ndarray, np.ndarray]:

@@ -421,26 +421,42 @@ class Softmax2:
         shuffle_index = np.random.permutation(m)
         X_train, Y_train = X_train[:, shuffle_index], Y_train[:, shuffle_index]
         i = 12
-        plt.imshow(X_train[:, i].reshape(28, 28), cmap=matplotlib.cm.binary)
-        plt.axis("off")
-        plt.show()
+        # plt.imshow(X_train[:, i].reshape(28, 28), cmap=matplotlib.cm.binary)
+        # plt.axis("off")
+        # plt.show()
         print(Y_train[:, i])
 
+        # configs = (
+        #     LayerConfiguration("Layer 1", 64, (28 * 28,), Sigmoid(), Xaviar(), Adaptive(0.1)),
+        #     LayerConfiguration("Output", 10, (64,), Softmax(), Xaviar(), Adaptive(0.1))
+        # )
         configs = (
-            LayerConfiguration("Layer 1", 64, (28 * 28,), Sigmoid(), Xaviar(), Adaptive(0.1)),
-            LayerConfiguration("Output", 10, (64,), Softmax(), Xaviar(), Adaptive(0.1))
+            LayerConfiguration("Layer 1", 64, (28 * 28,), Sigmoid(), File("digits/Layer0.h5"), Adaptive(0.1)),
+            LayerConfiguration("Output", 10, (64,), Softmax(), File("digits/Layer1.h5"), Adaptive(0.1))
         )
         model = Network(NetworkConfiguration("Model", CategoricalCrossEntropy()))
         model.add(*(Layer(config) for config in configs))
 
         np.random.seed(1)
-        costs = model.train(X_train, Y_train, 200)
-        plt.plot(np.squeeze(costs))
-        plt.ylabel('cost')
-        plt.xlabel('iterations')
-        plt.title("Learning rate =" + str(0.1))
-        plt.show()
-        model.save_weights("digits")
+        # costs = model.train(X_train, Y_train, 200)
+        # plt.plot(np.squeeze(costs))
+        # plt.ylabel('cost')
+        # plt.xlabel('iterations')
+        # plt.title("Learning rate =" + str(0.1))
+        # plt.show()
+        # model.save_weights("digits")
+
+        print(X_train[:,0])
+        XN=X_train[:,0]
+        print(XN.shape)
+        output = model.network_forward(X_train[:,0])
+        print(output)
+        print(output.shape)
+
+        print("Train:")
+        model.confusion_matrix(X_train, Y_train)
+        print("Test:")
+        model.confusion_matrix(X_test, Y_test)
 
 
 if __name__ == "__main__":

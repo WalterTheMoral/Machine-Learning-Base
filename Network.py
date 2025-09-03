@@ -2,6 +2,7 @@ import numpy as np
 from typing import List
 import os
 import h5py
+from sklearn.metrics import classification_report, confusion_matrix
 
 from NetworkClasses.Network_Configuration import *
 from Layer import Layer
@@ -103,6 +104,14 @@ class Network:
             return predictions
         else:
             return network_output > self.threshold
+
+    def confusion_matrix(self, X, Y):
+        prediction = self.predict(X)
+        prediction_index = np.argmax(prediction, axis=0)
+        Y_index = np.argmax(Y, axis=0)
+        right = np.sum(prediction_index == Y_index)
+        print("accuracy: ", str(right / len(Y[0])))
+        print(confusion_matrix(prediction_index, Y_index))
 
     def __str__(self) -> str:
         lines = [

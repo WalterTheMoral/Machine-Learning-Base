@@ -46,7 +46,8 @@ class Layer:
         """
 
         self._previous_layer = np.copy(input_activation)
-        self._Z = np.dot(self.W, input_activation) + self.b
+        # self._Z = np.dot(self.W, input_activation) + self.b
+        self._Z = (self.W @ input_activation) + self.b
         return self.activation.calculate(self._Z)
 
     def backward_propagation(self, dA: np.ndarray) -> np.ndarray:
