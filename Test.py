@@ -9,6 +9,7 @@ from LayerClasses.Layer_Configuration import LayerConfiguration
 from LayerClasses.LearningStrategy import *
 from LayerClasses.Initialisation import *
 from LayerClasses.Activation import *
+from LayerClasses.Regularisation import *
 from Network import *
 from NetworkClasses.Network_Configuration import *
 from NetworkClasses.Cost import *
@@ -458,6 +459,58 @@ class Softmax2:
         print("Test:")
         model.confusion_matrix(X_test, Y_test)
 
+class BiasAndVariance:
+    def test(self):
+        np.random.seed(1)
+        l1 = Layer(LayerConfiguration("Perceptron 1", 3, (100,), Relu()))
+        # print(l1)
+        l2 = Layer(LayerConfiguration("Perceptron 2", 5, (3,), Relu(), regularisation=L2(0.5)))
+        # print(l2)
+        l3 = Layer(LayerConfiguration("Softmax", 7, (5,), Softmax(), regularisation=Dropout()))
+        # print(l3)
+
+        print("\n" + "*"*80 + "\n")
+
+        np.random.seed(2)
+        l4 = Layer(LayerConfiguration("Droput", 3, (15,), LeakyRelu(), He(), regularisation=Dropout()))
+        A_prev = np.random.randn(15, 4) * 10
+        A_no_dropout = l4.feedforward(A_prev, False)
+        print("Output with no dropout:")
+        print(A_no_dropout)
+        A_with_dropout = l4.feedforward(A_prev, True)
+        print("Output with  dropout:")
+        print(A_with_dropout)
+
+        print("\n" + "*"*80 + "\n")
+
+        np.random.seed(2)
+        l4 = Layer(LayerConfiguration("Drouput", 3, (15,), LeakyRelu(), He(), regularisation=Dropout()))
+        A_prev = np.random.randn(15, 4) * 5
+        A_with_dropout = l4.feedforward(A_prev, True)
+        dA = np.random.randn(3, 4) * 15
+        dAl_prev = l4.backward_propagation(dA)
+        print("dAl_prev:")
+        print(dAl_prev)
+        print("dW:")
+        print(l4.dW)
+        print("db:")
+        print(l4.db)
+
+        print("\n" + "*"*80 + "\n")
+
+        np.random.seed(3)
+        X = np.random.randn(15, 7) * 5
+        Y = np.random.rand(1, 7) > 0.5
+        model = Network(NetworkConfiguration("Model", CrossEntropy()))
+        configs = (
+            LayerConfiguration("L2", 3, (15,), regularisation=L2(0.6), activation=Relu()),
+            LayerConfiguration("No regularisation", 13, (3,), activation=Relu()),
+            LayerConfiguration("L2", 1, (13,), Sigmoid(), He(), regularisation=L2())
+        )
+        model.add(*(Layer(config) for config in configs))
+        J = model.train(X, Y, 1)
+        print("J:", str(J[0]))
+
 
 if __name__ == "__main__":
-    Softmax2().test()
+    BiasAndVariance().test()

@@ -17,6 +17,7 @@ class Layer:
         self.learning_strategy: LearningStrategy = configuration.learning_strategy
         self.activation = configuration.activation
         self.initialisation = configuration.initialisation
+        self.regularisation = configuration.regularisation
 
         self.W, self.b = self.initialisation.initialise_weights(self.unit_count, self.input_shape)
         self.learning_strategy.initialise_adaptive(self.unit_count, self.input_shape)
@@ -36,7 +37,7 @@ class Layer:
             hf.create_dataset("W", data=self.W)
             hf.create_dataset("b", data=self.b)
 
-    def feedforward(self, input_activation: np.ndarray) -> np.ndarray:
+    def feedforward(self, input_activation: np.ndarray, is_training: bool =False) -> np.ndarray:
         """
         Propagates the layer forward, updating internal _previous_layer and _Z variables
 
@@ -45,9 +46,12 @@ class Layer:
         :return: Vector of output of all perceptrons in layer
         """
 
-        self._previous_layer = np.copy(input_activation)
-        # self._Z = np.dot(self.W, input_activation) + self.b
-        self._Z = (self.W @ input_activation) + self.b
+        if is_training:
+            self._previous_layer = self.regularisation.dropped_layer(input_activation)
+        else:
+            self._previous_layer = input_activation.copy()
+
+        self._Z = (self.W @ self._previous_layer) + self.b
         return self.activation.calculate(self._Z)
 
     def backward_propagation(self, dA: np.ndarray) -> np.ndarray:
@@ -61,10 +65,16 @@ class Layer:
 
         m = self._previous_layer.shape[1] 
         dZ = self.activation.gradient(self._Z) * dA
+
         self.dW = (1.0 / m) * np.dot(dZ, self._previous_layer.T)
         self.db = (1.0 / m) * np.sum(dZ, axis=1, keepdims=True)
 
-        return np.dot(self.W.T, dZ)
+        dA_calculated = np.dot(self.W.T, dZ)
+
+        if isinstance(self.regularisation, Dropout):
+            dA_calculated *= (self.regularisation.kept / self.regularisation.keep_prob)
+
+        return dA_calculated
 
     def update_parameters(self) -> None:
         """
@@ -83,6 +93,7 @@ class Layer:
             str(self.initialisation),
             str(self.activation),
             str(self.learning_strategy),
+            str(self.regularisation),
             f"Weights:",
             f"\tb: {self.b.T}",
             f"\tW Shape: {self.W.shape}"

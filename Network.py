@@ -38,6 +38,15 @@ class Network:
         for i, layer in enumerate(self.layers):
             layer.save_weights(path, f"Layer{i}")
 
+    def compute_network_cost(self, calculated_output: np.ndarray, expected_output: np.ndarray) -> float:
+        cost = self.cost.compute_cost(calculated_output, expected_output)
+
+        reg = sum(layer.regularisation.calculate_l2(layer.W) for layer in self.layers)
+        reg /= (2*calculated_output.shape[1])
+
+        return cost + reg
+
+
     def network_forward(self, inputs: np.ndarray) -> np.ndarray:
         """
         Performs a forward pass through the neural network.
